@@ -20,32 +20,40 @@ const Navbar = () => {
 	const id = useId();
 
 	return (
-		<footer className="navbar">
-			<nav className="navbarNav">
-				<ul className="navbarListItems">
-					{navItems.map(({ path, tag, Icon, key }) => (
-						<li
-							key={`${id}-${key}`}
-							className="navbarListItem"
-							onClick={() => navigate(path)}>
-							<Icon
-								fill={path === pathname ? "#2c2c2c" : "#8f8f8f"}
-								width="36px"
-								height="36px"
-							/>
-							<p
-								className={
-									path === pathname
-										? "navbarListItemNameActive"
-										: "navbarListItemName"
-								}>
-								{tag}
-							</p>
-						</li>
-					))}
-				</ul>
-			</nav>
-		</footer>
+		<>
+			{/* This first div added just to take space at the end of page (visibility 0 makes sure space is taken but content is not visible) so that footer which is fixed doesn't cover content at page end */}
+			<div style={{ height: "50px", visibility: "hidden" }}></div>
+			<footer className="navbar">
+				<nav className="navbarNav">
+					<ul className="navbarListItems">
+						{navItems.map(({ path, tag, Icon, key }) => (
+							<li
+								key={`${id}-${key}`}
+								className="navbarListItem"
+								onClick={() => navigate(path)}>
+								<Icon
+									fill={
+										path === pathname
+											? "#2c2c2c"
+											: "#8f8f8f"
+									}
+									width="36px"
+									height="36px"
+								/>
+								<p
+									className={
+										path === pathname
+											? "navbarListItemNameActive"
+											: "navbarListItemName"
+									}>
+									{tag}
+								</p>
+							</li>
+						))}
+					</ul>
+				</nav>
+			</footer>
+		</>
 	);
 };
 
