@@ -156,6 +156,7 @@ button {
   width: 100%;
   margin-top: 0.75rem;
   overflow-y: hidden;
+  padding-top: 5px;
 }
 
 .navbarListItems {
