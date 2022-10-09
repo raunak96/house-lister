@@ -10,6 +10,8 @@ import {
 	getDownloadURL,
 } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import db from "../firebase.config";
 
 const CreateListing = () => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -28,8 +30,8 @@ const CreateListing = () => {
 		regularPrice: 0,
 		discountedPrice: 0,
 		images: {},
-		latitude: 0,
-		longitude: 0,
+		_lat: 0,
+		_long: 0,
 	});
 	useEffect(() => {
 		if (!user?.uid && !isLoadingUser) navigate("/sign-in");
@@ -96,8 +98,8 @@ const CreateListing = () => {
 					setIsLoading(false);
 					return;
 				}
-				geolocation._lat = data.latitude;
-				geolocation._long = data.longitude;
+				geolocation._lat = data[0].latitude;
+				geolocation._long = data[0].longitude;
 			} catch (error) {
 				toast.error(
 					"Could not get geolocation, enter Latitude, Longitude Manually"
@@ -146,17 +148,43 @@ const CreateListing = () => {
 					}
 				);
 			});
+		let imageUrls = [];
 		try {
-			const imageUrls = await Promise.all(
+			imageUrls = await Promise.all(
 				[...images].map(image => storeImage(image))
 			);
-			console.log(imageUrls);
 		} catch (error) {
 			setIsLoading(false);
 			toast.error("Images could not be uploaded");
 			return;
 		}
-		setIsLoading(false);
+		/* Prepare data to be sent for listing to firestore(db) */
+		const listingData = {
+			...formData,
+			geolocation,
+			location,
+			imageUrls,
+			timestamp: serverTimestamp(),
+		};
+		delete listingData.address;
+		delete listingData._lat;
+		delete listingData._long;
+		delete listingData.images;
+		!listingData.offer && delete listingData.discountedPrice;
+		console.log(listingData);
+		try {
+			const docRef = await addDoc(
+				collection(db, "listings"),
+				listingData
+			);
+			setIsLoading(false);
+			toast.success("Listing added successfully");
+			navigate(`/category/${listingData.type}/${docRef.id}`);
+		} catch (error) {
+			console.log(error);
+			setIsLoading(false);
+			toast.error("Could not add listing. Pls try again.");
+		}
 	};
 
 	return isLoading || isLoadingUser ? (
@@ -305,7 +333,7 @@ const CreateListing = () => {
 								<input
 									className="formInputSmall"
 									type="number"
-									id="latitude"
+									id="_lat"
 									value={_lat}
 									onChange={handleChange}
 									required
@@ -316,7 +344,7 @@ const CreateListing = () => {
 								<input
 									className="formInputSmall"
 									type="number"
-									id="longitude"
+									id="_long"
 									value={_long}
 									onChange={handleChange}
 									required
