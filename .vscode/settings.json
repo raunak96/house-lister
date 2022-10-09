@@ -3,6 +3,9 @@
         "appspot",
         "firebaseapp",
         "Firestore",
+        "GEOCODE",
+        "toastify",
+        "uuidv",
         "Xypdxhrw"
     ]
 }

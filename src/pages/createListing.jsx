@@ -3,6 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 import useAuthStatus from "../hooks/useAuthStatus";
+import {
+	getStorage,
+	ref,
+	uploadBytesResumable,
+	getDownloadURL,
+} from "firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
 const CreateListing = () => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -45,6 +52,20 @@ const CreateListing = () => {
 		_long,
 	} = formData;
 
+	const handleChange = e => {
+		let value = null,
+			formInput = e.target.value;
+		if (e.target.files) value = e.target.files;
+		else
+			value =
+				formInput === "true"
+					? true
+					: formInput === "false"
+					? false
+					: formInput;
+		setFormData(prev => ({ ...prev, [e.target.id]: value }));
+	};
+
 	const handleSubmit = async e => {
 		e.preventDefault();
 		setIsLoading(true);
@@ -59,8 +80,11 @@ const CreateListing = () => {
 			toast.error("You can upload max 6 images for your listing.");
 			return;
 		}
-		let geolocation = {},
-			location;
+
+		/* GEOCODING PART */
+
+		let geolocation = {};
+		let location = address;
 		if (geolocationEnabled) {
 			try {
 				const res = await fetch(
@@ -79,23 +103,60 @@ const CreateListing = () => {
 					"Could not get geolocation, enter Latitude, Longitude Manually"
 				);
 				setGeolocationEnabled(false);
+				return;
 			}
 		} else geolocation = { _lat, _long };
-		location = address;
+
+		/* Function to - IMAGE UPLOAD TO FIREBASE STORAGE */
+		const storeImage = async image =>
+			new Promise((resolve, reject) => {
+				const storage = getStorage();
+				const fileName = `${user.uid}-${image.name}-${uuidv4()}`;
+				const storageRef = ref(storage, `images/${fileName}`);
+				const uploadTask = uploadBytesResumable(storageRef, image);
+
+				/* This monitors the progress of file upload - 3 stages -> State_Change(i.e pause/resume/progress), error, success */
+				uploadTask.on(
+					"state_changed",
+					snapshot => {
+						// Observe state change events such as progress, pause, and resume
+						// Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+						const progress =
+							(snapshot.bytesTransferred / snapshot.totalBytes) *
+							100;
+						console.log("Upload is " + progress + "% done");
+						switch (snapshot.state) {
+							case "paused":
+								console.log("Upload is paused");
+								break;
+							case "running":
+							default:
+								console.log("Upload is running");
+								break;
+						}
+					},
+					error => {
+						reject(error);
+					},
+					() => {
+						// On Success, we are returning downloadURL generated from firebase storage
+						getDownloadURL(uploadTask.snapshot.ref).then(
+							downloadURL => resolve(downloadURL)
+						);
+					}
+				);
+			});
+		try {
+			const imageUrls = await Promise.all(
+				[...images].map(image => storeImage(image))
+			);
+			console.log(imageUrls);
+		} catch (error) {
+			setIsLoading(false);
+			toast.error("Images could not be uploaded");
+			return;
+		}
 		setIsLoading(false);
-	};
-	const handleChange = e => {
-		let value = null,
-			formInput = e.target.value;
-		if (e.target.files) value = e.target.files;
-		else
-			value =
-				formInput === "true"
-					? true
-					: formInput === "false"
-					? false
-					: formInput;
-		setFormData(prev => ({ ...prev, [e.target.id]: value }));
 	};
 
 	return isLoading || isLoadingUser ? (
