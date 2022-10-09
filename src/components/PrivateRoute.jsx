@@ -15,7 +15,7 @@ const PrivateRoute = () => {
 	const [user, loading] = useAuthStatus();
 
 	if (loading) return <Spinner />;
-	return user ? <Outlet /> : <Navigate to="/sign-in" />;
+	return Object.keys(user).length ? <Outlet /> : <Navigate to="/sign-in" />;
 };
 
 export default PrivateRoute;

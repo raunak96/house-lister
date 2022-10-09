@@ -2,7 +2,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useEffect, useRef, useState } from "react";
 
 const useAuthStatus = () => {
-	const [user, setUser] = useState(null);
+	const [user, setUser] = useState({});
 	const [loading, setLoading] = useState(true);
 	const isMounted = useRef(true);
 

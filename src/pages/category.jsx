@@ -7,12 +7,14 @@ import {
 	where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import ListingItem from "../components/ListingItem";
 import Spinner from "../components/Spinner";
 import db from "../firebase.config";
 
-const Offers = () => {
+const Category = () => {
+	const { categoryName } = useParams();
 	const [listings, setListings] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -23,7 +25,7 @@ const Offers = () => {
 
 				const q = query(
 					listingsRef,
-					where("offer", "==", true),
+					where("type", "==", categoryName),
 					orderBy("timestamp", "desc"),
 					limit(10)
 				);
@@ -43,12 +45,12 @@ const Offers = () => {
 			}
 		};
 		getListings();
-	}, []);
+	}, [categoryName]);
 
 	return (
 		<div className="category">
 			<header>
-				<p className="pageHeader">Offers</p>
+				<p className="pageHeader">Places for {categoryName}</p>
 			</header>
 			{isLoading ? (
 				<Spinner />
@@ -66,10 +68,10 @@ const Offers = () => {
 					</main>
 				</>
 			) : (
-				<p>Currently there are no offers.</p>
+				<p>No listings for {categoryName}</p>
 			)}
 		</div>
 	);
 };
 
-export default Offers;
+export default Category;
