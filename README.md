@@ -12,3 +12,8 @@
 ### ADDING MAP
 - Package used - **react-leaflet** react version of **leaflet.js**
 - Read documentation at [https://react-leaflet.js.org/](https://react-leaflet.js.org/).
+
+
+### MOBILE TOUCH SLIDER EXPLORE AND LISTING PAGE
+- Used **SwiperJS** for this. Documentation at [https://swiperjs.com/react](https://swiperjs.com/react).
+- We have to add height property in css of parent slide container as its default height is 0. 

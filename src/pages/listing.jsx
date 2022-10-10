@@ -1,11 +1,15 @@
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import shareIcon from "../assets/svg/shareIcon.svg";
 import Spinner from "../components/Spinner";
 import db from "../firebase.config";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { Pagination } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
 
 const numToIndianCurr = price =>
 	price.toString().replace(/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g, ",");
@@ -14,6 +18,7 @@ const Listing = () => {
 	const [listing, setListing] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [shareLinkCopied, setShareLinkCopied] = useState(false);
+	const id = useId();
 	const { listingId } = useParams();
 	const navigate = useNavigate();
 	const auth = getAuth();
@@ -33,6 +38,22 @@ const Listing = () => {
 	if (isLoading) return <Spinner />;
 	return (
 		<main>
+			<Swiper
+				className="swiper-container"
+				modules={[Pagination]}
+				slidesPerView={1}
+				pagination={{ clickable: true }}>
+				{listing.imageUrls.map((url, index) => (
+					<SwiperSlide key={`${id}-${index}`}>
+						<div
+							style={{
+								background: `url(${url}) center no-repeat`,
+								backgroundSize: "cover",
+							}}
+							className="swiperSlideDiv"></div>
+					</SwiperSlide>
+				))}
+			</Swiper>
 			{!shareLinkCopied ? (
 				<div
 					className="shareIconDiv"
