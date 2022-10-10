@@ -414,7 +414,11 @@ button {
 .categoryListings {
   padding: 0;
 }
-
+.paginationMessage{
+    text-align: center;
+    opacity: 0.6;
+    margin-top:2rem;
+}
 .categoryListing {
   display: flex;
   justify-content: space-between;

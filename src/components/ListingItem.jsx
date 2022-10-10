@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 const numToIndianCurr = price =>
 	price.toString().replace(/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g, ",");
 
-const ListingItem = ({ listing, handleDelete }) => {
+const ListingItem = ({ listing, handleDelete, id }) => {
 	return (
 		<li className="categoryListing">
 			<Link
@@ -51,7 +51,7 @@ const ListingItem = ({ listing, handleDelete }) => {
 				<DeleteIcon
 					className="removeIcon"
 					fill="rgb(231,76,50)"
-					onClick={() => handleDelete(listing.id, listing.name)}
+					onClick={() => handleDelete(id, listing.name)}
 				/>
 			)}
 		</li>
@@ -60,5 +60,6 @@ const ListingItem = ({ listing, handleDelete }) => {
 ListingItem.propTypes = {
 	listing: PropTypes.object.isRequired,
 	handleDelete: PropTypes.func,
+	id: PropTypes.string,
 };
 export default ListingItem;
