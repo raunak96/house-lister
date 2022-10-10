@@ -159,6 +159,7 @@ const EditListing = () => {
 						"Could not get geolocation, enter Latitude, Longitude Manually"
 					);
 					setGeolocationEnabled(false);
+					setIsLoading(false);
 					return;
 				}
 			} else geolocation = { _lat, _long };

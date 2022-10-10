@@ -20,3 +20,7 @@
 
 
 [![Time Spent](https://wakatime.com/badge/github/raunak96/house-lister.svg)](https://wakatime.com/badge/github/raunak96/house-lister)
+
+### DEPLOYMENT NOTES
+- Deployment on [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
+- Make sure to add Domain of deployed app to Authorized Domains in Settings in Firebase Authentication otherwise it will give error.
