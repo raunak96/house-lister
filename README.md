@@ -5,6 +5,7 @@
 
 ### GEOCODE API
 - [Go to https://positionstack.com/](https://positionstack.com/)
+- Changed to **Mapbox** as positionstack is http in free tier hence our https app cant get resource from it.[Docs](https://docs.mapbox.com/).
   
 ### FILE UPLOAD IN FIREBASE STORAGE (In our case Image Upload)
 - Read documentation at [https://firebase.google.com/docs/storage/web/upload-files](https://firebase.google.com/docs/storage/web/upload-files).

@@ -89,17 +89,21 @@ const CreateListing = () => {
 		let location = address;
 		if (geolocationEnabled) {
 			try {
-				const res = await fetch(
-					`http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEO_ACCESS_KEY}&query=${address}&limit=1`
+				const encodedAddress = encodeURI(
+					location.replace("#", "").replace(";", "")
 				);
-				const { data } = await res.json();
-				if (!data.length) {
+				const res = await fetch(
+					`${process.env.REACT_APP_MAPBOX_URI}/${encodedAddress}.json?access_token=${process.env.REACT_APP_MAPBOX_TOKEN}`
+				);
+				const data = await res.json();
+				if (!data.features.length) {
 					toast.error("Please enter a valid address and try again.");
 					setIsLoading(false);
 					return;
 				}
-				geolocation._lat = data[0].latitude;
-				geolocation._long = data[0].longitude;
+				const coords = data.features[0].center;
+				geolocation._lat = coords[1];
+				geolocation._long = coords[0];
 			} catch (error) {
 				toast.error(
 					"Could not get geolocation, enter Latitude, Longitude Manually"
@@ -384,7 +388,7 @@ const CreateListing = () => {
 							id="regularPrice"
 							value={regularPrice}
 							onChange={handleChange}
-							min="4000000"
+							min="15000"
 							max="750000000"
 							required
 						/>
@@ -405,7 +409,7 @@ const CreateListing = () => {
 									id="discountedPrice"
 									value={discountedPrice}
 									onChange={handleChange}
-									min="2000000"
+									min="10000"
 									max="700000000"
 									required={offer}
 								/>
