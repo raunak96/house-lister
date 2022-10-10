@@ -8,3 +8,7 @@
   
 ### FILE UPLOAD IN FIREBASE STORAGE (In our case Image Upload)
 - Read documentation at [https://firebase.google.com/docs/storage/web/upload-files](https://firebase.google.com/docs/storage/web/upload-files).
+
+### ADDING MAP
+- Package used - **react-leaflet** react version of **leaflet.js**
+- Read documentation at [https://react-leaflet.js.org/](https://react-leaflet.js.org/).

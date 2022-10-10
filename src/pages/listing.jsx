@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import shareIcon from "../assets/svg/shareIcon.svg";
 import Spinner from "../components/Spinner";
 import db from "../firebase.config";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 
 const numToIndianCurr = price =>
 	price.toString().replace(/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g, ",");
@@ -82,6 +83,28 @@ const Listing = () => {
 					<li>{listing.furnished && "Furnished"}</li>
 				</ul>
 				<p className="listingLocationTitle">Location</p>
+				<div className="leafletContainer">
+					<MapContainer
+						style={{ height: "100%", width: "100%" }}
+						center={[
+							listing.geolocation._lat,
+							listing.geolocation._long,
+						]}
+						zoom={13}
+						scrollWheelZoom={false}>
+						<TileLayer
+							attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+							url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+						/>
+						<Marker
+							position={[
+								listing.geolocation._lat,
+								listing.geolocation._long,
+							]}>
+							<Popup>{listing.location}</Popup>
+						</Marker>
+					</MapContainer>
+				</div>
 
 				{auth.currentUser?.uid !== listing.userRef && (
 					<Link
