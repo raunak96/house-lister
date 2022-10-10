@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 import useAuthStatus from "../hooks/useAuthStatus";
@@ -10,13 +10,19 @@ import {
 	getDownloadURL,
 } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+	deleteField,
+	doc,
+	getDoc,
+	serverTimestamp,
+	updateDoc,
+} from "firebase/firestore";
 import db from "../firebase.config";
 
-const CreateListing = () => {
-	const [isLoading, setIsLoading] = useState(false);
+const EditListing = () => {
+	const [isLoading, setIsLoading] = useState(true);
+	const [listing, setListing] = useState(null);
 	const [geolocationEnabled, setGeolocationEnabled] = useState(true);
-	const navigate = useNavigate();
 	const [user, isLoadingUser] = useAuthStatus();
 	const [formData, setFormData] = useState({
 		type: "rent",
@@ -29,15 +35,10 @@ const CreateListing = () => {
 		offer: true,
 		regularPrice: 0,
 		discountedPrice: 0,
-		images: {},
+		images: [],
 		_lat: 0,
 		_long: 0,
 	});
-	useEffect(() => {
-		if (!user?.uid && !isLoadingUser) navigate("/sign-in");
-		else setFormData(prev => ({ ...prev, userRef: user.uid }));
-	}, [user?.uid, navigate, isLoadingUser]);
-
 	const {
 		type,
 		name,
@@ -53,6 +54,55 @@ const CreateListing = () => {
 		_lat,
 		_long,
 	} = formData;
+
+	const navigate = useNavigate();
+	const { listingId } = useParams();
+
+	/* Check after loading user auth status -> if logged-in ok , else redirect to sign in page */
+	useEffect(() => {
+		if (!user?.uid && !isLoadingUser) navigate("/sign-in");
+		else setFormData(prev => ({ ...prev, userRef: user.uid }));
+	}, [user?.uid, navigate, isLoadingUser]);
+
+	/* Get Listing Data -> pre-populate Form Field */
+	useEffect(() => {
+		const fetchList = async () => {
+			const docSnapshot = await getDoc(doc(db, "listings", listingId));
+			if (docSnapshot.exists()) {
+				setListing({ ...docSnapshot.data(), exists: true });
+				setFormData(prev => ({
+					...prev,
+					...docSnapshot.data(),
+					address: docSnapshot.data().location,
+				}));
+				setIsLoading(false);
+			} else {
+				navigate("/");
+				toast.error("Listing does not exist!");
+			}
+		};
+		fetchList();
+	}, [navigate, listingId]);
+
+	/* Checks if listing's owner is user */
+	useEffect(() => {
+		if (
+			!isLoadingUser &&
+			!isLoading &&
+			listing?.exists &&
+			user.uid !== listing.userRef
+		) {
+			toast.error("You are not authorized to access this page!");
+			navigate("/");
+		}
+	}, [
+		isLoading,
+		isLoadingUser,
+		listing?.exists,
+		listing?.userRef,
+		navigate,
+		user.uid,
+	]);
 
 	const handleChange = e => {
 		let value = null,
@@ -85,29 +135,34 @@ const CreateListing = () => {
 
 		/* GEOCODING PART */
 
-		let geolocation = {};
+		let geolocation = listing.geolocation;
 		let location = address;
-		if (geolocationEnabled) {
-			try {
-				const res = await fetch(
-					`http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEO_ACCESS_KEY}&query=${address}&limit=1`
-				);
-				const { data } = await res.json();
-				if (!data.length) {
-					toast.error("Please enter a valid address and try again.");
-					setIsLoading(false);
+
+		if (location !== listing.location) {
+			if (geolocationEnabled) {
+				try {
+					const res = await fetch(
+						`http://api.positionstack.com/v1/forward?access_key=${process.env.REACT_APP_GEO_ACCESS_KEY}&query=${address}&limit=1`
+					);
+					const { data } = await res.json();
+					if (!data.length) {
+						toast.error(
+							"Please enter a valid address and try again."
+						);
+						setIsLoading(false);
+						return;
+					}
+					geolocation._lat = data[0].latitude;
+					geolocation._long = data[0].longitude;
+				} catch (error) {
+					toast.error(
+						"Could not get geolocation, enter Latitude, Longitude Manually"
+					);
+					setGeolocationEnabled(false);
 					return;
 				}
-				geolocation._lat = data[0].latitude;
-				geolocation._long = data[0].longitude;
-			} catch (error) {
-				toast.error(
-					"Could not get geolocation, enter Latitude, Longitude Manually"
-				);
-				setGeolocationEnabled(false);
-				return;
-			}
-		} else geolocation = { _lat, _long };
+			} else geolocation = { _lat, _long };
+		}
 
 		/* Function to - IMAGE UPLOAD TO FIREBASE STORAGE */
 		const storeImage = async image =>
@@ -148,15 +203,17 @@ const CreateListing = () => {
 					}
 				);
 			});
-		let imageUrls = [];
-		try {
-			imageUrls = await Promise.all(
-				[...images].map(image => storeImage(image))
-			);
-		} catch (error) {
-			setIsLoading(false);
-			toast.error("Images could not be uploaded");
-			return;
+		let imageUrls = listing.imageUrls;
+		if ([...images].length > 0) {
+			try {
+				imageUrls = await Promise.all(
+					[...images].map(image => storeImage(image))
+				);
+			} catch (error) {
+				setIsLoading(false);
+				toast.error("Images could not be uploaded");
+				return;
+			}
 		}
 
 		/* Prepare data to be sent for listing to firestore(db) */
@@ -171,15 +228,13 @@ const CreateListing = () => {
 		delete listingData._lat;
 		delete listingData._long;
 		delete listingData.images;
-		!listingData.offer && delete listingData.discountedPrice;
+		if (!listingData.offer) listingData.discountedPrice = deleteField();
+
 		try {
-			const docRef = await addDoc(
-				collection(db, "listings"),
-				listingData
-			);
+			await updateDoc(doc(db, "listings", listingId), listingData);
 			setIsLoading(false);
 			toast.success("Listing added successfully");
-			navigate(`/category/${listingData.type}/${docRef.id}`);
+			navigate(`/category/${listingData.type}/${listingId}`);
 		} catch (error) {
 			setIsLoading(false);
 			toast.error("Could not add listing. Pls try again.");
@@ -191,7 +246,7 @@ const CreateListing = () => {
 	) : (
 		<div className="profile">
 			<header>
-				<p className="pageHeader">List your property</p>
+				<p className="pageHeader">Edit Listing</p>
 			</header>
 			<main>
 				<form onSubmit={handleSubmit}>
@@ -384,7 +439,7 @@ const CreateListing = () => {
 							id="regularPrice"
 							value={regularPrice}
 							onChange={handleChange}
-							min="4000000"
+							min="15000"
 							max="750000000"
 							required
 						/>
@@ -405,7 +460,7 @@ const CreateListing = () => {
 									id="discountedPrice"
 									value={discountedPrice}
 									onChange={handleChange}
-									min="2000000"
+									min="10000"
 									max="700000000"
 									required={offer}
 								/>
@@ -417,7 +472,8 @@ const CreateListing = () => {
 					)}
 					<label className="formLabel">Images</label>
 					<p className="imagesInfo">
-						The first image will be the cover (max 6).
+						The first image will be the cover (max 6). Only add
+						images if you want to remove all existing ones.
 					</p>
 					<input
 						className="formInputFile"
@@ -427,12 +483,11 @@ const CreateListing = () => {
 						max="6"
 						accept=".jpg,.png,.jpeg"
 						multiple
-						required
 					/>
 					<button
 						type="submit"
 						className="primaryButton createListingButton">
-						Create Listing
+						Update Listing
 					</button>
 				</form>
 			</main>
@@ -440,4 +495,4 @@ const CreateListing = () => {
 	);
 };
 
-export default CreateListing;
+export default EditListing;

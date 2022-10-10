@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { ReactComponent as DeleteIcon } from "../assets/svg/deleteIcon.svg";
-// import { ReactComponent as EditIcon } from "../assets/svg/editIcon.svg";
+import { ReactComponent as EditIcon } from "../assets/svg/editIcon.svg";
 import bedIcon from "../assets/svg/bedIcon.svg";
 import bathtubIcon from "../assets/svg/bathtubIcon.svg";
 import { Link } from "react-router-dom";
@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 const numToIndianCurr = price =>
 	price.toString().replace(/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g, ",");
 
-const ListingItem = ({ listing, handleDelete, id }) => {
+const ListingItem = ({ listing, handleDelete, handleEdit, id }) => {
 	return (
 		<li className="categoryListing">
 			<Link
@@ -51,8 +51,11 @@ const ListingItem = ({ listing, handleDelete, id }) => {
 				<DeleteIcon
 					className="removeIcon"
 					fill="rgb(231,76,50)"
-					onClick={() => handleDelete(id, listing.name)}
+					onClick={() => handleDelete(id)}
 				/>
+			)}
+			{handleEdit && (
+				<EditIcon className="editIcon" onClick={() => handleEdit(id)} />
 			)}
 		</li>
 	);
@@ -60,6 +63,7 @@ const ListingItem = ({ listing, handleDelete, id }) => {
 ListingItem.propTypes = {
 	listing: PropTypes.object.isRequired,
 	handleDelete: PropTypes.func,
+	handleEdit: PropTypes.func,
 	id: PropTypes.string,
 };
 export default ListingItem;

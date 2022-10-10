@@ -6,6 +6,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Category from "./pages/category";
 import Contact from "./pages/contact";
 import CreateListing from "./pages/createListing";
+import EditListing from "./pages/editListing";
 import Explore from "./pages/explore";
 import ForgotPassword from "./pages/forgotPassword";
 import Listing from "./pages/listing";
@@ -25,10 +26,6 @@ const App = () => {
 						path="/category/:categoryName"
 						element={<Category />}
 					/>
-					<Route
-						path="/category/:categoryName/:listingId"
-						element={<Listing />}
-					/>
 					<Route path="/contact/:ownerId" element={<Contact />} />
 					<Route path="/profile" element={<PrivateRoute />}>
 						<Route path="/profile" element={<Profile />} />
@@ -39,7 +36,15 @@ const App = () => {
 						path="/forgot-password"
 						element={<ForgotPassword />}
 					/>
+					<Route
+						path="/category/:categoryName/:listingId"
+						element={<Listing />}
+					/>
 					<Route path="/create-listing" element={<CreateListing />} />
+					<Route
+						path="/edit-listing/:listingId"
+						element={<EditListing />}
+					/>
 				</Routes>
 				<Navbar />
 			</Router>

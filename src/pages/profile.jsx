@@ -57,6 +57,7 @@ const Profile = () => {
 			toast.success("Successfully deleted the listing.");
 		}
 	};
+	const handleEdit = listingId => navigate(`/edit-listing/${listingId}`);
 
 	const logOut = () => {
 		auth.signOut();
@@ -135,6 +136,7 @@ const Profile = () => {
 									listing={listing}
 									handleDelete={handleDelete}
 									id={listing.id}
+									handleEdit={handleEdit}
 								/>
 							))}
 						</ul>

@@ -17,3 +17,6 @@
 ### MOBILE TOUCH SLIDER EXPLORE AND LISTING PAGE
 - Used **SwiperJS** for this. Documentation at [https://swiperjs.com/react](https://swiperjs.com/react).
 - We have to add height property in css of parent slide container as its default height is 0. 
+
+
+[![Time Spent](https://wakatime.com/badge/github/raunak96/house-lister.svg)](https://wakatime.com/badge/github/raunak96/house-lister)
