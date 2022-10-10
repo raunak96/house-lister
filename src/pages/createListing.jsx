@@ -182,7 +182,7 @@ const CreateListing = () => {
 				listingData
 			);
 			setIsLoading(false);
-			toast.success("Listing added successfully");
+			toast.success("Listing Added successfully");
 			navigate(`/category/${listingData.type}/${docRef.id}`);
 		} catch (error) {
 			setIsLoading(false);

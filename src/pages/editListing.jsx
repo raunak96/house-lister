@@ -238,7 +238,7 @@ const EditListing = () => {
 		try {
 			await updateDoc(doc(db, "listings", listingId), listingData);
 			setIsLoading(false);
-			toast.success("Listing added successfully");
+			toast.success("Listing Updated successfully");
 			navigate(`/category/${listingData.type}/${listingId}`);
 		} catch (error) {
 			setIsLoading(false);
