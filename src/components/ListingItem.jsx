@@ -5,6 +5,9 @@ import bedIcon from "../assets/svg/bedIcon.svg";
 import bathtubIcon from "../assets/svg/bathtubIcon.svg";
 import { Link } from "react-router-dom";
 
+const numToIndianCurr = price =>
+	price.toString().replace(/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g, ",");
+
 const ListingItem = ({ listing, handleDelete }) => {
 	return (
 		<li className="categoryListing">
@@ -24,18 +27,8 @@ const ListingItem = ({ listing, handleDelete }) => {
 					<p className="categoryListingPrice">
 						₹
 						{listing.offer
-							? listing.discountedPrice
-									.toString()
-									.replace(
-										/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g,
-										","
-									)
-							: listing.regularPrice
-									.toString()
-									.replace(
-										/\B(?=(?:(\d\d)+(\d)(?!\d))+(?!\d))/g,
-										","
-									)}
+							? numToIndianCurr(listing.discountedPrice)
+							: numToIndianCurr(listing.regularPrice)}
 						{listing.type === "rent" && " / month"}
 					</p>
 					<div className="categoryListingInfoDiv">

@@ -71,6 +71,20 @@ button {
   align-items: center;
   justify-content: center;
 }
+.disabledButton {
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, 0.1);
+    color: rgba(0,0,0, 0.2);
+    border-radius: 1rem;
+    padding: 0.85rem 2rem;
+    font-weight: 600;
+    font-size: 1.25rem;
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .removeIcon {
   cursor: pointer;
@@ -564,7 +578,7 @@ button {
 
 .linkCopied {
   position: fixed;
-  top: 9%;
+  top: 3%;
   right: 5%;
   z-index: 2;
   background-color: #ffffff;
@@ -608,6 +622,7 @@ button {
 
 .messageLabel {
   margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .profile {
